@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+  ],
+  "settings": {
+    "editor.detectIndentation": false,
+    "editor.tabCompletion": "on",
+    "editor.tabSize": 2,
+  },
+  "extensions": {
+    "recommendations": [
+      "davidanson.vscode-markdownlint"
+    ]
+  }
+}
