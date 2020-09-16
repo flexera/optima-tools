@@ -7,7 +7,6 @@
     * Note 1: Refresh Tokens are specific to a user/shard, NOT an account. You technically only need one for US-3 and US-4.
     * Note 2: Treat refresh tokens as passwords/secrets. They are sensitive and specific to you.
   * [Bill Adjustments API Reference](https://reference.rightscale.com/bill_analysis/?url=swagger_adj.json)
-  * [COS Enablement Confluence Document](https://confluence.flexera.com/display/rightscale/COS+Adjustment+Enablement)
   * [Bill Adjustment JSON Editor](https://reference.rightscale.com/bill_analysis/adj_json_editor/)
 * Information
   * By default, these scripts are designed to run with little to no feedback. Add `-Verbose` to the end of any command to get more detailed information.
