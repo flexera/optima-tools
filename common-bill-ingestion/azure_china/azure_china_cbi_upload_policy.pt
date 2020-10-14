@@ -1,0 +1,181 @@
+name "Azure China CBI Upload"
+rs_pt_ver 20180301
+type "policy"
+short_description "CBI Policy"
+long_description ""
+severity "low"
+category "Cost"
+default_frequency "daily"
+info(
+  version: "1.0",
+)
+
+###############################################################################
+# Parameters
+###############################################################################
+
+# Need to read the Azure EA key from credentials
+permission "perm_read_creds" do
+  actions   "rs_cm.show_sensitive","rs_cm.index_sensitive"
+  resources "rs_cm.credentials"
+end
+
+# Could maybe get this from the EA key, but for now just ask for it
+parameter "param_enrollment" do
+  type "string"
+  label "Azure Enrollment ID"
+end
+
+parameter "param_bill_connect_id" do
+  type "string"
+  label "Bill Connect Id"
+end
+
+parameter "param_period" do
+  type "string"
+  label "Period"
+end
+
+parameter "param_email" do
+  type "list"
+  label "Email addresses of the recipients you wish to notify"
+end
+
+credentials "azure_ea_auth" do
+  schemes "api_key"
+  label "Azure"
+  description "Select the Azure EA Credential from the list."
+  tags "provider=azure_ea_china"
+end
+
+auth "auth_rs", type: "rightscale"
+
+# Build the API request object dynamically because we need to
+#  calculate the startdate and enddate based on today
+# This is our API: https://docs.microsoft.com/en-us/rest/api/billing/enterprise/billing-enterprise-api-reserved-instance-usage#request-for--reserved-instance-usage-summary
+# Use the request object above to make the API call and get the data
+
+datasource "download" do
+  request do
+    run_script $azure_ri_request, $param_enrollment, $param_period
+  end
+  result do
+    encoding "text"
+  end
+end
+
+script "azure_ri_request", type: "javascript" do
+  parameters "enrollment", "period"
+  result "request"
+  code <<-EOS
+  var request = {
+    auth: "azure_ea_auth",
+    host: "ea.azure.cn",
+    path: "/rest/" + enrollment + "/usage-report",
+    query_params: {
+      "month": period,
+      "type": "detail",
+      "fmt": "csv",
+    },
+    headers: {
+      "User-Agent": "RS Policies",
+      "api-version": "2014-09-02",
+    }
+  }
+  EOS
+end
+
+datasource "create_bill_upload" do
+  request do
+    run_script $cbi_create_bill_upload, rs_org_id, $param_bill_connect_id, $param_period
+  end
+end
+
+script "cbi_create_bill_upload", type: "javascript" do
+  parameters "org_id", "bill_connect_id", "period"
+  result "request"
+  code <<-EOS
+  var request = {
+    auth: "auth_rs",
+    verb: "POST",
+    host: "optima-bill-upload-front.indigo.rightscale.com",
+    path: "/optima/orgs/" + org_id + "/billUploads",
+    body_fields: {
+      "billConnectId": bill_connect_id,
+      "billingPeriod": period,
+    },
+    headers: {
+      "User-Agent": "RS Policies",
+      "allow_redirects": "False",
+    }
+  }
+  EOS
+end
+
+datasource "upload" do
+  request do
+    run_script $cbi_upload, rs_org_id, $download, $param_period, $create_bill_upload
+  end
+end
+
+script "cbi_upload", type: "javascript" do
+  parameters "org_id", "download", "period" , "create_bill_upload"
+  result "request"
+  code <<-EOS
+  var request = {
+    auth: "auth_rs",
+    verb: "POST",
+    host: "optima-bill-upload-front.indigo.rightscale.com",
+    //path: "/optima/orgs/" + org_id + "/billUploads/a6c33331-d8b2-11ea-9291-b62039d83b87/files/" + period + '.csv',
+    path: "/optima/orgs/" + org_id + "/billUploads/" + create_bill_upload["id"] + '/files/' + period + '.csv',
+    headers: {
+      "User-Agent": "RS Policies",
+    },
+    body: download
+  }
+  EOS
+end
+
+datasource "commit" do
+  request do
+    run_script $cbi_commit, rs_org_id, $upload, $create_bill_upload
+  end
+end
+
+script "cbi_commit", type: "javascript" do
+  parameters "org_id", "upload", "create_bill_upload"
+  result "request"
+  code <<-EOS
+  var request = {
+    auth: "auth_rs",
+    verb: "POST",
+    host: "optima-bill-upload-front.indigo.rightscale.com",
+    path: "/optima/orgs/" + org_id + "/billUploads/" + create_bill_upload["id"] + '/operations',
+    //path: "/optima/orgs/" + org_id + "/billUploads/4d5acb39-d8ed-11ea-8c5a-4e18226d1adc/operations",
+    headers: {
+      "User-Agent": "RS Policies",
+    },
+    body_fields: {"operation":"commit"}
+  }
+  EOS
+end
+
+policy "pol_cbi" do
+  validate $commit do
+    summary_template "Azure CBI Bill Ingest {{parameters.param_period}}"
+    detail_template <<-EOS
+Bill Ingested
+EOS
+    escalate $email
+    resolve $res_close_incident
+    check eq(0,1)
+  end
+end
+
+escalation "email" do
+  email $param_email
+end
+
+resolution "res_close_incident" do
+  email $param_email
+end
