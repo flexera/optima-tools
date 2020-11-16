@@ -1,7 +1,7 @@
 name "Azure China CBI Upload"
 rs_pt_ver 20180301
 type "policy"
-short_description "Azure China CBI Policy"
+short_description "Azure China CBI Policy. See the [README](https://github.com/flexera/optima-tools/tree/master/common-bill-ingestion/azure_china/) and [docs.rightscale.com/policies](https://docs.rightscale.com/policies/) to learn more."
 long_description ""
 severity "low"
 category "Cost"
