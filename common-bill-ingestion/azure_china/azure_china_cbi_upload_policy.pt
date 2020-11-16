@@ -1,7 +1,7 @@
 name "Azure China CBI Upload"
 rs_pt_ver 20180301
 type "policy"
-short_description "CBI Policy"
+short_description "Azure China CBI Policy"
 long_description ""
 severity "low"
 category "Cost"
@@ -37,13 +37,14 @@ end
 
 parameter "param_period" do
   type "string"
-  label "Period"
+  label "Billing Period"
+  description "Billing Period from Azure Portal YYYY-MM"
   allowed_pattern /20[2-9][0-9]-[0-1][0-9]/
 end
 
 parameter "param_email" do
   type "list"
-  label "Email addresses of the recipients you wish to notify"
+  label "Email addresses"
 end
 
 credentials "azure_ea_auth" do
