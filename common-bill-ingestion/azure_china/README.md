@@ -2,7 +2,8 @@
 
 ## What it does
 
-This Policy will poll the Azure China EA API, download the bill and upload it to CBI Bill Upload API
+This Policy will poll the Azure China EA API, download the bill and upload it to CBI Bill Upload API.
+This Policy will need to be applied every month with a new *Billing Period*
 
 ## Input Parameters
 
