@@ -24,16 +24,21 @@ end
 parameter "param_enrollment" do
   type "string"
   label "Azure Enrollment ID"
+  description "Enrollment ID from Azure China Billing Portal"
+  allowed_pattern /V[0-9]{7}S[0-9]{4}/
 end
 
 parameter "param_bill_connect_id" do
   type "string"
-  label "Bill Connect Id"
+  label "Bill Connect ID"
+  description "Bill Connect ID created in CBI API ex: cbi-oi-azure-china-*"
+  allowed_pattern /cbi-oi-azure-china-[a-zA-Z0-9]*/
 end
 
 parameter "param_period" do
   type "string"
   label "Period"
+  allowed_pattern /20[2-9][0-9]-[0-1][0-9]/
 end
 
 parameter "param_email" do
@@ -44,7 +49,7 @@ end
 credentials "azure_ea_auth" do
   schemes "api_key"
   label "Azure"
-  description "Select the Azure EA Credential from the list."
+  description "Select the Azure China EA Credential from the list"
   tags "provider=azure_ea_china"
 end
 
@@ -164,7 +169,7 @@ policy "pol_cbi" do
   validate $commit do
     summary_template "Azure CBI Bill Ingest {{parameters.param_period}}"
     detail_template <<-EOS
-Bill Ingested
+Bill Uploaded
 EOS
     escalate $email
     resolve $res_close_incident
