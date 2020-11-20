@@ -2,7 +2,7 @@
 
 ## Authentication
 
-```sh
+```powershell
 
 $RefreshToken = 'retrieve from user settings in console'
 
@@ -24,7 +24,7 @@ $RefreshToken = 'retrieve from user settings in console'
 
 
 ## Create a bill upload job
-```sh
+```powershell
 
  $billUploadCreateBody = @{
     "billConnectId" = "cbi-ci-private-123456";
@@ -37,7 +37,7 @@ $billUploadCreate = Invoke-RestMethod -Uri "https://optima.rightscale.com/optima
 ```
 ## Post data to upload job
 
-```sh
+```powershell
 $fileToUpload = 'billing-data-vmware-2019-09.csv'
 $fileContentsBody = Get-Content $fileName| Out-String
 
@@ -46,7 +46,7 @@ $billUploadPost = Invoke-RestMethod -Uri "https://optima.rightscale.com/optima/o
 
 ```
 ## Commit the upload job
-```sh
+```powershell
     $billUploadCommitBody = @{
       "operation" = "commit";
     } | ConvertTo-Json
@@ -55,7 +55,7 @@ $billUploadPost = Invoke-RestMethod -Uri "https://optima.rightscale.com/optima/o
 ```
 
 ## List Upload Jobs
-```sh
+```powershell
   $billUploadList = Invoke-RestMethod -Uri "https://optima.rightscale.com/optima/orgs/$OrganizationId/billUploads" -Method GET -Headers $UserHeader -ContentType $contentType  
   
 
