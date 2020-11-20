@@ -35,7 +35,7 @@ $RefreshToken = 'retrieve from user settings in console'
 
 $billUploadCreate = Invoke-RestMethod -Uri "https://optima.rightscale.com/optima/orgs/$OrganizationId/billUploads" -Method POST -Headers $UserHeader -ContentType $contentType  -Body $billUploadCreateBody
 ```
-## Post data to upload job
+## Post data to the upload job
 
 ```powershell
 $fileToUpload = 'billing-data-vmware-2019-09.csv'
