@@ -1,0 +1,3 @@
+[submodule "tableau/webdataconnector"]
+	path = tableau/webdataconnector
+	url = https://github.com/tableau/webdataconnector.git
