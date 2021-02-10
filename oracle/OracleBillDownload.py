@@ -1,5 +1,6 @@
 import oci
 import os
+from datetime import datetime
 
 # This script downloads all of the cost, usage, (or both) reports for a tenancy (specified in the config file).
 #
@@ -33,15 +34,17 @@ report_bucket_objects = object_storage.list_objects(reporting_namespace, reporti
 
 for o in report_bucket_objects.data.objects:
     print('Found file ' + o.name)
-    print(o.attribute_map)
-    print(o.time_modified)
-"""
+    folder_time = o.time_modified.strftime("%Y-%m")
+    download_folder = os.path.join(destintation_path,folder_time)
+    # Make a directory to receive reports
+    if not os.path.exists(download_folder):
+      os.mkdir(download_folder)
+
     object_details = object_storage.get_object(reporting_namespace, reporting_bucket, o.name)
     filename = o.name.rsplit('/', 1)[-1]
 
-    with open(destintation_path + '/' + filename, 'wb') as f:
+    with open(download_folder + '/' + filename, 'wb') as f:
         for chunk in object_details.data.raw.stream(1024 * 1024, decode_content=False):
             f.write(chunk)
 
     print('----> File ' + o.name + ' Downloaded')
-"""
