@@ -1,0 +1,27 @@
+{
+  "rules": {
+    "editorconfig": true,
+    "common-misspellings": {
+      "ignore": []
+    },
+    "no-dead-link": {
+      "checkRelative": true,
+      "baseURI": null,
+      "ignore": ["http://deployment.server.com/ManageSoftDL"],
+      "preferGET": [],
+      "ignoreRedirects": false,
+      "retry": 3,
+      "userAgent": "textlint-rule-no-dead-link/1.0"
+    }
+  },
+  "filters": {
+    "comments": true,
+    "allowlist": {
+      "allow": [
+          "ignored-word",
+          "/\\d{4}-\\d{2}-\\d{2}/",
+          "/===IGNORE===[\\s\\S]*?===\/IGNORE===/m"
+      ]
+    }
+  }
+}

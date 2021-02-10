@@ -1,0 +1,15 @@
+*.log
+dist/
+.DS_Store
+.vscode/
+*.log
+*.js
+*.json
+node_modules/
+!package.json
+!package-lock.json
+*.tmp
+*.csv
+*.xls*
+*.gz
+test.py
