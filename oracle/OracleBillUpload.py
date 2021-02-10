@@ -4,42 +4,23 @@ import logging
 import requests
 import sys
 import time
-'''
-Basic Bill Upload example 2
----------------------------
-Creates a bill upload, uploads a file, then commits that bill_upload.
-Note: it's OK to create a new upload for a given org_id, bill connect and period,
-provided any previous one (for that same org_id/bill connect/period) has been committed (or aborted).
-
-Usage: ./bill_upload_example2.py <refresh_token> <org_id> <bill_connect_id> <period> <filename>
-
-Parameters:
-<refresh token>:   obtained from Cloud Management:
-                   - go to Settings, then API Credentials in the Account Settings;
-                   - enable the token and pass its value to this script.
-<org_id>:          the relevant organization id, e.g. "25667"
-<bill_connect_id>: for WotC, for now, please use "cbi-wotc-1"
-<period>:          the billing month in YYYY-MM format, e.g. "2020-06"
-<filename>:        the file path, e.g. "./testfiles/my_file01.csv"
-'''
 
 # Tweak the destination (e.g. sys.stdout instead) and level (e.g. logging.DEBUG instead) to taste!
 logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', stream=sys.stderr, level=logging.INFO)
 
-if len(sys.argv) < 6:
-    logging.error('Missing command-line options!!!')
-    print(__doc__)
-    sys.exit(1)
+refresh_token = os.environ.get('REFRESH_TOKEN')
+org_id = os.environ.get('ORG_ID')
+bill_connect_id = os.environ.get("BILL_CONNECT_ID")
+period = os.environ.get("PERIOD")
+shard = os.environ.get("SHARD")
+if not shard == 3 or not shard == 4:
+  logging.error('Invalid Shard Number' + shard)
+  sys.exit(1)
 
-refresh_token, org_id, bill_connect_id, period, filename = sys.argv[1:]
 logging.info("Using org_id {}, bill_connect_id {}, period {}, filename {}".format(
-             org_id, bill_connect_id, period, filename))
+             org_id, bill_connect_id, period))
 
-if org_id == "25667" and bill_connect_id != "cbi-wotc-1":
-    logging.error('For org 25667, please use bill_connect_id cbi-wotc-1, not {}'.format(bill_connect_id))
-    sys.exit(1)
-
-token_url = "https://us-3.rightscale.com/api/oauth2"
+token_url = "https://us-"+ shard +".rightscale.com/api/oauth2"
 bill_upload_url = "https://optima-bill-upload-front.indigo.rightscale.com/optima/orgs/{}/billUploads".format(org_id)
 
 logging.info("OAuth2: Getting Access Token via Refresh Token...")
@@ -58,10 +39,19 @@ logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), inden
 r.raise_for_status()
 bill_upload_id = r.json()["id"]
 
-logging.info("2. Upload file {} to Bill Upload {}...".format(filename, bill_upload_id))
-upload_file_url = "{}/{}/files/{}".format(bill_upload_url, bill_upload_id, filename)
-r = requests.post(upload_file_url, data=open(filename, 'rb').read(), **kwargs)
-logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), indent=4)))
+# uploading files to endpoint
+dir_path =  os.path.dirname(os.path.realpath(__file__))
+json_file = os.path.join(dir_path, 'files.json')
+
+with open(json_file) as f:
+  data = json.load(f)
+
+for filename in data:
+  base_name = os.path.basename(filename)
+  logging.info("2. Upload file {} to Bill Upload {}...".format(base_name, bill_upload_id))
+  upload_file_url = "{}/{}/files/{}".format(bill_upload_url, bill_upload_id, base_name)
+  r = requests.post(upload_file_url, data=open(filename, 'rb').read(), **kwargs)
+  logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), indent=4)))
 
 logging.info("3. Committing the Bill Upload {}...".format(bill_upload_id))
 operations_url = "{}/{}/operations".format(bill_upload_url, bill_upload_id)
