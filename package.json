@@ -1,7 +1,7 @@
 {
   "name": "optima-tools",
   "version": "1.0.0",
-  "description": "**Services Organization - Client Specific Artifacts**",
+  "description": "**Flexera Optima Tools**",
   "main": "",
   "dependencies": {
     "textlint": "^11.7.6",
