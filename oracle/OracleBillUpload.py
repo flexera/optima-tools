@@ -17,7 +17,7 @@ if not shard == 3 or not shard == 4:
   logging.error('Invalid Shard Number' + shard)
   sys.exit(1)
 
-logging.info("Using org_id {}, bill_connect_id {}, period {}, filename {}".format(
+logging.info("Using org_id {}, bill_connect_id {}, period {}".format(
              org_id, bill_connect_id, period))
 
 token_url = "https://us-"+ shard +".rightscale.com/api/oauth2"
