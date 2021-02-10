@@ -3,6 +3,7 @@ import os
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pytz
+import json
 
 # This script downloads all of the cost, usage, (or both) reports for a tenancy (specified in the config file).
 #
@@ -43,6 +44,9 @@ utc=pytz.UTC
 now = datetime.now()
 last_three_months = utc.localize(now) + relativedelta(months=-3)
 
+# set downloaded_files array for upload
+downloaded_files = []
+
 for o in report_bucket_objects.data.objects:
   if download_all_files:
     download = True
@@ -62,7 +66,8 @@ for o in report_bucket_objects.data.objects:
 
     object_details = object_storage.get_object(reporting_namespace, reporting_bucket, o.name)
     filename = o.name.rsplit('/', 1)[-1]
-
+    written_file_name = os.path.join(download_folder, file_name)
+    print(written_file_name)
     with open(download_folder + '/' + filename, 'wb') as f:
         for chunk in object_details.data.raw.stream(1024 * 1024, decode_content=False):
             f.write(chunk)
