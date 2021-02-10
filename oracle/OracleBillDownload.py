@@ -1,6 +1,8 @@
 import oci
 import os
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
+import pytz
 
 # This script downloads all of the cost, usage, (or both) reports for a tenancy (specified in the config file).
 #
@@ -22,6 +24,10 @@ prefix_file = ""                     #  For cost and usage files
 # Update these values
 destintation_path = 'CBI'
 
+# Download all file or just past three months.
+env_download_all = os.environ.get("DOWNLOAD_ALL")
+download_all_files = bool(env_download_all)
+
 # Make a directory to receive reports
 if not os.path.exists(destintation_path):
     os.mkdir(destintation_path)
@@ -32,7 +38,21 @@ reporting_bucket = config['tenancy']
 object_storage = oci.object_storage.ObjectStorageClient(config)
 report_bucket_objects = object_storage.list_objects(reporting_namespace, reporting_bucket, prefix=prefix_file, fields='name,etag,timeCreated,md5,timeModified,storageTier,archivalState')
 
+# Do date stuff
+utc=pytz.UTC
+now = datetime.now()
+last_three_months = utc.localize(now) + relativedelta(months=-3)
+
 for o in report_bucket_objects.data.objects:
+  if download_all_files:
+    download = True
+  elif o.time_modified >= last_three_months:
+    print("Downloading files from " + last_three_months.strftime("%Y-%m") + " to " + now.strftime("%Y-%m"))
+    download = True
+  else:
+    download = False
+
+  if download:
     print('Found file ' + o.name)
     folder_time = o.time_modified.strftime("%Y-%m")
     download_folder = os.path.join(destintation_path,folder_time)
@@ -48,3 +68,4 @@ for o in report_bucket_objects.data.objects:
             f.write(chunk)
 
     print('----> File ' + o.name + ' Downloaded')
+
