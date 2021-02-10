@@ -64,13 +64,18 @@ for o in report_bucket_objects.data.objects:
     if not os.path.exists(download_folder):
       os.mkdir(download_folder)
 
-    object_details = object_storage.get_object(reporting_namespace, reporting_bucket, o.name)
     filename = o.name.rsplit('/', 1)[-1]
-    written_file_name = os.path.join(download_folder, file_name)
-    print(written_file_name)
-    with open(download_folder + '/' + filename, 'wb') as f:
-        for chunk in object_details.data.raw.stream(1024 * 1024, decode_content=False):
-            f.write(chunk)
+    written_file_name = os.path.join(download_folder, filename)
+    downloaded_files.append(written_file_name)
 
-    print('----> File ' + o.name + ' Downloaded')
+    if not os.path.exists(written_file_name):
+      object_details = object_storage.get_object(reporting_namespace, reporting_bucket, o.name)
 
+      with open(written_file_name, 'wb') as f:
+          for chunk in object_details.data.raw.stream(1024 * 1024, decode_content=False):
+              f.write(chunk)
+
+      print('----> File ' + o.name + ' Downloaded')
+
+    with open('files.json','w') as outfile:
+        json.dump(downloaded_files, outfile, indent=2)
