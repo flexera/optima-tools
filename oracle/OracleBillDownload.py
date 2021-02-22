@@ -16,6 +16,7 @@ from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pytz
 import json
+from collections import defaultdict
 
 reporting_namespace = 'bling'
 
@@ -78,5 +79,25 @@ for o in report_bucket_objects.data.objects:
 
       print('----> File ' + o.name + ' Downloaded')
 
-    with open('files.json','w') as outfile:
-        json.dump(downloaded_files, outfile, indent=2)
+# https://stackoverflow.com/questions/18208898/concatenate-gzipped-files-with-python-on-windows
+my_dict = defaultdict(list)
+
+for f in downloaded_files:
+  my_dict[f[:12]].append(f)
+
+concatenatedFiles = []
+for key in my_dict.keys():
+  destFilename = os.path.join(key, "concatenated.gz")
+  concatenatedFiles.append(destFilename)
+  bufferSize = 8  # Adjust this according to how "memory efficient" you need the program to be.
+
+  with open(destFilename, 'wb') as destFile:
+    for fileName in my_dict[key]:
+      with open(fileName, 'rb') as sourceFile:
+        chunk = True
+        while chunk:
+            chunk = sourceFile.read(bufferSize)
+            destFile.write(chunk)
+
+with open('files.json','w') as outfile:
+    json.dump(concatenatedFiles, outfile, indent=2)
