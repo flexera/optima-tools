@@ -13,9 +13,10 @@ org_id = os.environ.get('ORG_ID')
 bill_connect_id = os.environ.get("BILL_CONNECT_ID")
 shard = os.environ.get("SHARD")
 
-if not shard == "3" and not shard == "4":
-  logging.error('Invalid Shard Number' + shard)
-  sys.exit(1)
+if not shard == '3':
+  if not shard == '4':
+    logging.error('Invalid Shard Number ' + shard)
+    sys.exit(1)
 
 logging.info("Using org_id {}, bill_connect_id {}, period {}".format(
              org_id, bill_connect_id, period))
@@ -40,7 +41,7 @@ with open(json_file) as f:
   data = json.load(f)
 
 for filename in data:
-  period = filename.split('\\')[1])
+  period = filename.split('\\')[1]
   logging.info("1. Creating Bill Upload for Period:" + period)
   bill_upload = {"billConnectId": bill_connect_id, "billingPeriod": period}
   r = requests.post(bill_upload_url, json.dumps(bill_upload), **kwargs)
