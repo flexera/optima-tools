@@ -13,7 +13,8 @@ org_id = os.environ.get('ORG_ID')
 bill_connect_id = os.environ.get("BILL_CONNECT_ID")
 period = os.environ.get("PERIOD")
 shard = os.environ.get("SHARD")
-if not shard == 3 and not shard == 4:
+
+if not shard == "3" and not shard == "4":
   logging.error('Invalid Shard Number' + shard)
   sys.exit(1)
 

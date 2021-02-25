@@ -87,7 +87,7 @@ for f in downloaded_files:
 
 concatenatedFiles = []
 for key in my_dict.keys():
-  destFilename = os.path.join(key, "concatenated.gz")
+  destFilename = os.path.join(key, "concatenated.csv.gz")
   concatenatedFiles.append(destFilename)
   bufferSize = 8  # Adjust this according to how "memory efficient" you need the program to be.
 
