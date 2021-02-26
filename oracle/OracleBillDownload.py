@@ -17,6 +17,7 @@ from dateutil.relativedelta import relativedelta
 import pytz
 import json
 from collections import defaultdict
+import gzip
 
 reporting_namespace = 'bling'
 
@@ -87,17 +88,16 @@ for f in downloaded_files:
 
 concatenatedFiles = []
 for key in my_dict.keys():
-  destFilename = os.path.join(key, "concatenated.gz")
+  destFilename = os.path.join(key, "concatenated.csv.gz")
   concatenatedFiles.append(destFilename)
-  bufferSize = 8  # Adjust this according to how "memory efficient" you need the program to be.
 
-  with open(destFilename, 'wb') as destFile:
+  with gzip.open(destFilename, 'wb') as destFile:
+    counter = 0
     for fileName in my_dict[key]:
-      with open(fileName, 'rb') as sourceFile:
-        chunk = True
-        while chunk:
-            chunk = sourceFile.read(bufferSize)
-            destFile.write(chunk)
+      with gzip.open(fileName, 'rb') as sourceFile:
+        for chunk in sourceFile.readlines()[counter:]:
+          destFile.write(chunk)
+      counter =  1
 
 with open('files.json','w') as outfile:
     json.dump(concatenatedFiles, outfile, indent=2)
