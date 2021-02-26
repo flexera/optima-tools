@@ -40,7 +40,7 @@ with open(json_file) as f:
   data = json.load(f)
 
 for filename in data:
-  period = filename.split('\\')[1])
+  period = filename.split('\\')[1]
   logging.info("1. Creating Bill Upload for Period:" + period)
   bill_upload = {"billConnectId": bill_connect_id, "billingPeriod": period}
   r = requests.post(bill_upload_url, json.dumps(bill_upload), **kwargs)
