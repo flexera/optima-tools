@@ -13,9 +13,10 @@ org_id = os.environ.get('ORG_ID')
 bill_connect_id = os.environ.get("BILL_CONNECT_ID")
 shard = os.environ.get("SHARD")
 
-if not shard == "3" and not shard == "4":
-  logging.error('Invalid Shard Number' + shard)
-  sys.exit(1)
+if not shard == '3':
+  if not shard == '4':
+    logging.error('Invalid Shard Number ' + shard)
+    sys.exit(1)
 
 logging.info("Using org_id {}, bill_connect_id {}, period {}".format(
              org_id, bill_connect_id, period))
