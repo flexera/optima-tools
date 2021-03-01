@@ -3,3 +3,4 @@ name: oci-cbi
 version: 0.0.1
 runtime: docker
 memory: 1024
+timeout: 300

@@ -12,6 +12,7 @@ Note - The only value you need to change is the group name. Do not change the OC
 
 import oci
 import os
+import io
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pytz
@@ -24,7 +25,7 @@ import sys
 import time
 from fdk import response
 
-def handler(ctx):
+def handler(ctx, data: io.BytesIO=None):
   # Tweak the destination (e.g. sys.stdout instead) and level (e.g. logging.DEBUG instead) to taste!
   logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', stream=sys.stderr, level=logging.INFO)
 
@@ -41,20 +42,24 @@ def handler(ctx):
 
   # Get Configuration Options & Check
   try:
+    payload_bytes = data.getvalue()
+    if payload_bytes==b'':
+        raise KeyError('No keys in payload')
+    payload = json.loads(payload_bytes)
+    org_id = payload['rs_org_id']
+    rs_cm_host = payload['rs_cm_host']
+    bill_connect_id = payload["bill_connect_id"]
+  except Exception as ex:
+      print('ERROR: Missing key in payload', ex, flush=True)
+      raise
+
+  try:
     cfg = ctx.Config()
     refresh_token = cfg['REFRESH_TOKEN']
-    org_id = cfg['ORG_ID']
-    bill_connect_id = cfg["BILL_CONNECT_ID"]
-    shard = cfg["SHARD"]
     download_all_files = cfg["DOWNLOAD_ALL", False]
   except Exception as e:
     print('Missing function parameters: ' + e + '', flush=True)
     raise
-
-  if not shard == '3':
-    if not shard == '4':
-      logging.error('Invalid Shard Number ' + shard)
-      sys.exit(1)
 
   # Make a directory to receive reports
   if not os.path.exists(destination_path):
@@ -122,13 +127,14 @@ def handler(ctx):
           for chunk in sourceFile.readlines()[counter:]:
             destFile.write(chunk)
         counter =  1
-
+        # limited space in function app
+        os.remove(fileName)
   with open('/tmp/files.json','w') as outfile:
       json.dump(concatenatedFiles, outfile, indent=2)
 
   # Upload Section
 
-  token_url = "https://us-"+ shard +".rightscale.com/api/oauth2"
+  token_url = "https://"+ rs_cm_host +"/api/oauth2"
   bill_upload_url = "https://optima-bill-upload-front.indigo.rightscale.com/optima/orgs/{}/billUploads".format(org_id)
 
   logging.info("OAuth2: Getting Access Token via Refresh Token...")
