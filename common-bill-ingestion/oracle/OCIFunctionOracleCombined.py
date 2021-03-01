@@ -94,7 +94,7 @@ def handler(ctx, data: io.BytesIO=None):
 
     if download:
       print('Found file ' + o.name)
-      folder_time = o.time_modified.strftime("%Y-%m")
+      folder_time = o.time_modified.strftime("%Y-%M")
       download_folder = os.path.join(destination_path,folder_time)
       # Make a directory to receive reports
       if not os.path.exists(download_folder):
@@ -113,6 +113,7 @@ def handler(ctx, data: io.BytesIO=None):
 
         print('----> File ' + o.name + ' Downloaded')
 
+  logging.info("Concatenating files")
   # https://stackoverflow.com/questions/18208898/concatenate-gzipped-files-with-python-on-windows
   my_dict = defaultdict(list)
 
@@ -132,11 +133,11 @@ def handler(ctx, data: io.BytesIO=None):
             destFile.write(chunk)
         counter =  1
         # limited space in function app
-        os.remove(fileName)
+        # os.remove(fileName)
   with open('/tmp/files.json','w') as outfile:
       json.dump(concatenatedFiles, outfile, indent=2)
 
-  # Upload Section
+  logging.info("Upload Section")
 
   token_url = "https://"+ rs_cm_host +"/api/oauth2"
   bill_upload_url = "https://optima-bill-upload-front.indigo.rightscale.com/optima/orgs/{}/billUploads".format(org_id)
