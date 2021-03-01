@@ -67,11 +67,11 @@ def handler(ctx, data: io.BytesIO=None):
       os.mkdir(destination_path)
 
   logging.info('Setup OCI Config')
-  config = oci.config.from_file(oci.config.DEFAULT_LOCATION, oci.config.DEFAULT_PROFILE)
-  reporting_bucket = config['tenancy']
+  signer = oci.auth.signers.get_resource_principals_signer()
+  reporting_bucket = signer.tenancy_id
 
   logging.info('Get the list of reports')
-  object_storage = oci.object_storage.ObjectStorageClient(config)
+  object_storage = oci.object_storage.ObjectStorageClient(config={}, signer=signer)
   report_bucket_objects = object_storage.list_objects(reporting_namespace, reporting_bucket, prefix=prefix_file, fields='name,etag,timeCreated,md5,timeModified,storageTier,archivalState')
 
   # Do date stuff
