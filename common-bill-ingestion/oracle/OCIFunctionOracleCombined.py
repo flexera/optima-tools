@@ -114,11 +114,15 @@ def handler(ctx, data: io.BytesIO=None):
         print('----> File ' + o.name + ' Downloaded')
 
   logging.info("Concatenating files")
+  arr = os.listdir(download_folder)
+  logging.info(arr)
   # https://stackoverflow.com/questions/18208898/concatenate-gzipped-files-with-python-on-windows
   my_dict = defaultdict(list)
 
   for f in downloaded_files:
     my_dict[f[:12]].append(f)
+
+  logging.info(my_dict)
 
   concatenatedFiles = []
   for key in my_dict.keys():
