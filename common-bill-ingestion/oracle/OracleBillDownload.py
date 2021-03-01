@@ -39,6 +39,7 @@ if not os.path.exists(destination_path):
 # Get the list of reports
 config = oci.config.from_file(oci.config.DEFAULT_LOCATION, oci.config.DEFAULT_PROFILE)
 reporting_bucket = config['tenancy']
+print(reporting_bucket)
 object_storage = oci.object_storage.ObjectStorageClient(config)
 report_bucket_objects = object_storage.list_objects(reporting_namespace, reporting_bucket, prefix=prefix_file, fields='name,etag,timeCreated,md5,timeModified,storageTier,archivalState')
 
