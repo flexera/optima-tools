@@ -22,8 +22,8 @@ import gzip
 reporting_namespace = 'bling'
 
 # Download all usage and cost files. You can comment out based on the specific need:
-prefix_file = ""                     #  For cost and usage files
-# prefix_file = "reports/cost-csv"   #  For cost
+# prefix_file = ""                     #  For cost and usage files
+prefix_file = "reports/cost-csv"   #  For cost
 # prefix_file = "reports/usage-csv"  #  For usage
 
 # Update these values
