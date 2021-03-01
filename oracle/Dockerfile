@@ -11,8 +11,7 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 # copy the content of the local src directory to the working directory
-COPY OracleCombined.py .
+COPY OCIFunctionOracleCombined.py .
 
 # command to run on container start
-CMD [ "python", "./OracleCombined.py" ]
-
+ENTRYPOINT ["fdk", "./OCIFunctionOracleCombined.py", "handler"]
