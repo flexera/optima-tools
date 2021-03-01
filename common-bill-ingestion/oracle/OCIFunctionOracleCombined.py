@@ -28,7 +28,7 @@ import shutil
 
 def log_tmp_space(path):
   space = shutil.disk_usage(path)
-  logging.info("Space Used: " + space)
+  print(space)
 
 def handler(ctx, data: io.BytesIO=None):
   print('Tweak the destination (e.g. sys.stdout instead) and level (e.g. logging.DEBUG instead) to taste!')
@@ -127,7 +127,7 @@ def handler(ctx, data: io.BytesIO=None):
   my_dict = defaultdict(list)
 
   for f in downloaded_files:
-    my_dict[f[:12]].append(f)
+    my_dict[f[:17]].append(f)
 
   logging.info(my_dict)
 
