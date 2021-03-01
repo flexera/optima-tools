@@ -110,6 +110,7 @@ def handler(ctx, data: io.BytesIO=None):
       downloaded_files.append(written_file_name)
 
       if not os.path.exists(written_file_name):
+        logging.info("downloading file to:" + written_file_name)
         object_details = object_storage.get_object(reporting_namespace, reporting_bucket, o.name)
 
         with open(written_file_name, 'wb') as f:
