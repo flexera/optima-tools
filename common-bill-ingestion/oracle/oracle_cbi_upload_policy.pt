@@ -25,7 +25,7 @@ parameter "param_bill_connect_id" do
   type "string"
   label "Bill Connect ID"
   description "Bill Connect ID created in CBI API ex: cbi-oi-azure-china-*"
-  allowed_pattern /cbi-oi-azure-china-[a-zA-Z0-9]*/
+  allowed_pattern /cbi-oi-oracle-[a-zA-Z0-9]*/
 end
 
 parameter "param_invoke_endpoint" do
@@ -76,7 +76,7 @@ policy "pol_cbi" do
   validate $create_bill_upload do
     summary_template "Oracle CBI Bill Upload"
     detail_template <<-EOS
-Bill Uploaded
+Bill Uploaded {{data.files_processed}}
 EOS
     escalate $email
     resolve $res_close_incident

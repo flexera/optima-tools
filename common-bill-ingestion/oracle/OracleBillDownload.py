@@ -46,7 +46,8 @@ report_bucket_objects = object_storage.list_objects(reporting_namespace, reporti
 # Do date stuff
 utc=pytz.UTC
 now = datetime.now()
-last_three_months = utc.localize(now) + relativedelta(months=-3)
+last_three_months = utc.localize(now) + relativedelta(months=-3,day=1,hour=0,minute=0,second=0,microsecond=0)
+print(last_three_months)
 
 # set downloaded_files array for upload
 downloaded_files = []
