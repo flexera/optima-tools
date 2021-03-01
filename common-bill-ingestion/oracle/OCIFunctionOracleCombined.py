@@ -28,10 +28,20 @@ import shutil
 
 def log_tmp_space(path):
   space = shutil.disk_usage(path)
-  print(space)
+  print(space, flush=True)
+
+# flush logs so I don't have to wait
+def init_logger():
+    logger = logging.getLogger()
+
+    h = logging.StreamHandler(sys.stdout)
+    h.flush = sys.stdout.flush
+    logger.addHandler(h)
+
+    return logger
 
 def handler(ctx, data: io.BytesIO=None):
-  print('Tweak the destination (e.g. sys.stdout instead) and level (e.g. logging.DEBUG instead) to taste!')
+  print('Tweak the destination (e.g. sys.stdout instead) and level (e.g. logging.DEBUG instead) to taste!', flush=True)
   logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', stream=sys.stdout, level=logging.INFO)
 
   # default Oracle Billing Namespace
@@ -45,7 +55,7 @@ def handler(ctx, data: io.BytesIO=None):
   # Update these values
   destination_path = '/tmp/CBI'
 
-  logging.info('Get Payload Options')
+  logging.info('Get Payload Options').flush()
   try:
     payload_bytes = data.getvalue()
     if payload_bytes==b'':
@@ -58,25 +68,25 @@ def handler(ctx, data: io.BytesIO=None):
       print('ERROR: Missing key in payload', ex, flush=True)
       raise
 
-  logging.info('get config options')
+  logging.info('get config options').flush()
   try:
     cfg = ctx.Config()
     refresh_token = cfg['REFRESH_TOKEN']
     download_all_files = cfg["DOWNLOAD_ALL"]
-    tenancy = cfg["TENANCY"]
+
   except Exception as e:
     print('Missing function parameters: ',e, flush=True)
     raise
 
-  logging.info('Make a directory to receive reports')
+  logging.info('Make a directory to receive reports').flush()
   if not os.path.exists(destination_path):
       os.mkdir(destination_path)
 
-  logging.info('Setup OCI Config')
+  logging.info('Setup OCI Config').flush()
   signer = oci.auth.signers.get_resource_principals_signer()
   reporting_bucket = signer.tenancy_id
 
-  logging.info('Get the list of reports for: ' + reporting_bucket)
+  logging.info('Get the list of reports for: ' + reporting_bucket).flush()
   object_storage = oci.object_storage.ObjectStorageClient(config={}, signer=signer)
   report_bucket_objects = object_storage.list_objects(reporting_namespace, reporting_bucket, prefix=prefix_file, fields='name,etag,timeCreated,md5,timeModified,storageTier,archivalState')
 
@@ -92,13 +102,13 @@ def handler(ctx, data: io.BytesIO=None):
     if download_all_files == "true":
       download = True
     elif o.time_modified >= last_three_months:
-      print("Downloading files from " + last_three_months.strftime("%Y-%m") + " to " + now.strftime("%Y-%m"))
+      print("Downloading files from " + last_three_months.strftime("%Y-%m") + " to " + now.strftime("%Y-%m"), flush=True)
       download = True
     else:
       download = False
 
     if download:
-      print('Found file ' + o.name)
+      print('Found file ' + o.name, flush=True)
       folder_time = o.time_modified.strftime("%Y-%m")
       download_folder = os.path.join(destination_path,folder_time)
       # Make a directory to receive reports
@@ -117,19 +127,15 @@ def handler(ctx, data: io.BytesIO=None):
             for chunk in object_details.data.raw.stream(1024 * 1024, decode_content=False):
                 f.write(chunk)
 
-        print('----> File ' + o.name + ' Downloaded')
+        print('----> File ' + o.name + ' Downloaded', flush=True)
 
-  logging.info("Concatenating files")
-  # log_tmp_space(download_folder)
-  # arr = os.listdir(download_folder)
-  # logging.info(arr)
+  logging.info("Concatenating files").flush()
+
   # https://stackoverflow.com/questions/18208898/concatenate-gzipped-files-with-python-on-windows
   my_dict = defaultdict(list)
 
   for f in downloaded_files:
     my_dict[f[:17]].append(f)
-
-  logging.info(my_dict)
 
   concatenatedFiles = []
   for key in my_dict.keys():
@@ -148,13 +154,13 @@ def handler(ctx, data: io.BytesIO=None):
   with open('/tmp/files.json','w') as outfile:
       json.dump(concatenatedFiles, outfile, indent=2)
 
-  logging.info("Upload Section")
+  logging.info("Upload Section").flush()
   log_tmp_space(download_folder)
 
   token_url = "https://"+ rs_cm_host +"/api/oauth2"
   bill_upload_url = "https://optima-bill-upload-front.indigo.rightscale.com/optima/orgs/{}/billUploads".format(org_id)
 
-  logging.info("OAuth2: Getting Access Token via Refresh Token...")
+  logging.info("OAuth2: Getting Access Token via Refresh Token...").flush()
   r = requests.post(token_url, data={"grant_type": "refresh_token", "refresh_token": refresh_token}, headers={"X-API-Version": "1.5"})
   r.raise_for_status()
   access_token = r.json()["access_token"]
@@ -173,24 +179,24 @@ def handler(ctx, data: io.BytesIO=None):
   for filename in data:
     period = filename.split('/')[3]
     logging.info("Using org_id {}, bill_connect_id {}, period {}".format(
-              org_id, bill_connect_id, period))
-    logging.info("1. Creating Bill Upload for Period:" + period)
+              org_id, bill_connect_id, period)).flush()
+    logging.info("1. Creating Bill Upload for Period:" + period).flush()
     bill_upload = {"billConnectId": bill_connect_id, "billingPeriod": period}
     r = requests.post(bill_upload_url, json.dumps(bill_upload), **kwargs)
-    logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), indent=4)))
+    logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), indent=4))).flush()
     r.raise_for_status()
     bill_upload_id = r.json()["id"]
 
     base_name = os.path.basename(filename)
-    logging.info("2. Upload file {} to Bill Upload {}...".format(base_name, bill_upload_id))
+    logging.info("2. Upload file {} to Bill Upload {}...".format(base_name, bill_upload_id)).flush()
     upload_file_url = "{}/{}/files/{}".format(bill_upload_url, bill_upload_id, base_name)
     r = requests.post(upload_file_url, data=open(filename, 'rb').read(), **kwargs)
-    logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), indent=4)))
+    logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), indent=4))).flush()
 
-    logging.info("3. Committing the Bill Upload {}...".format(bill_upload_id))
+    logging.info("3. Committing the Bill Upload {}...".format(bill_upload_id)).flush()
     operations_url = "{}/{}/operations".format(bill_upload_url, bill_upload_id)
     r = requests.post(operations_url, '{"operation":"commit"}', **kwargs)
-    logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), indent=4)))
+    logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), indent=4))).flush()
     r.raise_for_status()
 
   return response.Response(
