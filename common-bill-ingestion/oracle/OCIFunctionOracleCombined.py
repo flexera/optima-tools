@@ -110,7 +110,7 @@ def handler(ctx, data: io.BytesIO=None):
       downloaded_files.append(written_file_name)
 
       if not os.path.exists(written_file_name):
-        logging.info("downloading file to:" + written_file_name)
+        # logging.info("downloading file to:" + written_file_name)
         object_details = object_storage.get_object(reporting_namespace, reporting_bucket, o.name)
 
         with open(written_file_name, 'wb') as f:
@@ -120,9 +120,9 @@ def handler(ctx, data: io.BytesIO=None):
         print('----> File ' + o.name + ' Downloaded')
 
   logging.info("Concatenating files")
-  log_tmp_space(download_folder)
-  arr = os.listdir(download_folder)
-  logging.info(arr)
+  # log_tmp_space(download_folder)
+  # arr = os.listdir(download_folder)
+  # logging.info(arr)
   # https://stackoverflow.com/questions/18208898/concatenate-gzipped-files-with-python-on-windows
   my_dict = defaultdict(list)
 
@@ -171,7 +171,7 @@ def handler(ctx, data: io.BytesIO=None):
     data = json.load(f)
 
   for filename in data:
-    period = filename.split('\\')[1]
+    period = filename.split('/')[2]
     logging.info("Using org_id {}, bill_connect_id {}, period {}".format(
               org_id, bill_connect_id, period))
     logging.info("1. Creating Bill Upload for Period:" + period)
