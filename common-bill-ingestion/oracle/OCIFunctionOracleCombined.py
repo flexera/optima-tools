@@ -57,7 +57,8 @@ def handler(ctx, data: io.BytesIO=None):
   try:
     cfg = ctx.Config()
     refresh_token = cfg['REFRESH_TOKEN']
-    download_all_files = cfg["DOWNLOAD_ALL"] or False
+    download_all_files = cfg["DOWNLOAD_ALL"]
+    tenancy = cfg["TENANCY"]
   except Exception as e:
     print('Missing function parameters: ',e, flush=True)
     raise
@@ -68,7 +69,7 @@ def handler(ctx, data: io.BytesIO=None):
 
   logging.info('Setup OCI Config')
   signer = oci.auth.signers.get_resource_principals_signer()
-  reporting_bucket = signer.tenancy_id
+  reporting_bucket = tenancy
 
   logging.info('Get the list of reports')
   object_storage = oci.object_storage.ObjectStorageClient(config={}, signer=signer)
