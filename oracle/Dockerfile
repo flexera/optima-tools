@@ -14,5 +14,4 @@ RUN pip install -r requirements.txt
 COPY OCIFunctionOracleCombined.py .
 
 # command to run on container start
-CMD [ "python", "./OCIFunctionOracleCombined.py" ]
-
+ENTRYPOINT ["fdk", "./OCIFunctionOracleCombined.py", "handler"]
