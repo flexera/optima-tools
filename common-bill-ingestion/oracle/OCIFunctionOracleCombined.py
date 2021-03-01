@@ -26,8 +26,8 @@ import time
 from fdk import response
 
 def handler(ctx, data: io.BytesIO=None):
-  # Tweak the destination (e.g. sys.stdout instead) and level (e.g. logging.DEBUG instead) to taste!
-  logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', stream=sys.stderr, level=logging.INFO)
+  print('Tweak the destination (e.g. sys.stdout instead) and level (e.g. logging.DEBUG instead) to taste!')
+  logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', stream=sys.stdout, level=logging.INFO)
 
   # default Oracle Billing Namespace
   reporting_namespace = 'bling'
@@ -40,7 +40,7 @@ def handler(ctx, data: io.BytesIO=None):
   # Update these values
   destination_path = '/tmp/CBI'
 
-  # Get Configuration Options & Check
+  logging.info('Get Payload Options')
   try:
     payload_bytes = data.getvalue()
     if payload_bytes==b'':
@@ -53,6 +53,7 @@ def handler(ctx, data: io.BytesIO=None):
       print('ERROR: Missing key in payload', ex, flush=True)
       raise
 
+  logging.info('get config options')
   try:
     cfg = ctx.Config()
     refresh_token = cfg['REFRESH_TOKEN']
@@ -61,13 +62,15 @@ def handler(ctx, data: io.BytesIO=None):
     print('Missing function parameters: ',e, flush=True)
     raise
 
-  # Make a directory to receive reports
+  logging.info('Make a directory to receive reports')
   if not os.path.exists(destination_path):
       os.mkdir(destination_path)
 
-  # Get the list of reports
+  logging.info('Setup OCI Config')
   config = oci.config.from_file(oci.config.DEFAULT_LOCATION, oci.config.DEFAULT_PROFILE)
   reporting_bucket = config['tenancy']
+
+  logging.info('Get the list of reports')
   object_storage = oci.object_storage.ObjectStorageClient(config)
   report_bucket_objects = object_storage.list_objects(reporting_namespace, reporting_bucket, prefix=prefix_file, fields='name,etag,timeCreated,md5,timeModified,storageTier,archivalState')
 
