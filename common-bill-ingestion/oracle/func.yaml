@@ -1,6 +1,6 @@
 schema_version: 20180708
 name: oci-cbi
-version: 0.0.4
+version: latest
 runtime: docker
 memory: 1024
 timeout: 300

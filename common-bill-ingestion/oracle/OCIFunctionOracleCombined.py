@@ -28,7 +28,7 @@ import shutil
 
 def log_tmp_space(path):
   space = shutil.disk_usage(path)
-  logging.info("Space Used: " + space)
+  logging.info("Space Used: ", space)
 
 def handler(ctx, data: io.BytesIO=None):
   print('Tweak the destination (e.g. sys.stdout instead) and level (e.g. logging.DEBUG instead) to taste!')
