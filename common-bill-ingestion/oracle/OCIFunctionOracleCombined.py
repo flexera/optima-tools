@@ -58,7 +58,7 @@ def handler(ctx, data: io.BytesIO=None):
     refresh_token = cfg['REFRESH_TOKEN']
     download_all_files = cfg["DOWNLOAD_ALL", False]
   except Exception as e:
-    print('Missing function parameters: ' + e + '', flush=True)
+    print('Missing function parameters: ',e, flush=True)
     raise
 
   # Make a directory to receive reports
