@@ -21,7 +21,6 @@ permission "perm_read_creds" do
 end
 
 # Could maybe get this from the EA key, but for now just ask for it
-
 parameter "param_bill_connect_id" do
   type "string"
   label "Bill Connect ID"
