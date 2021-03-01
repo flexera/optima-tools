@@ -57,7 +57,7 @@ def handler(ctx, data: io.BytesIO=None):
   try:
     cfg = ctx.Config()
     refresh_token = cfg['REFRESH_TOKEN']
-    download_all_files = cfg["DOWNLOAD_ALL", False]
+    download_all_files = cfg["DOWNLOAD_ALL"] or False
   except Exception as e:
     print('Missing function parameters: ',e, flush=True)
     raise
@@ -83,7 +83,7 @@ def handler(ctx, data: io.BytesIO=None):
   downloaded_files = []
 
   for o in report_bucket_objects.data.objects:
-    if download_all_files:
+    if download_all_files == "true":
       download = True
     elif o.time_modified >= last_three_months:
       print("Downloading files from " + last_three_months.strftime("%Y-%m") + " to " + now.strftime("%Y-%m"))
