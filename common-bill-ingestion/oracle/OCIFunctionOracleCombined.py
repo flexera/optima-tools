@@ -171,7 +171,7 @@ def handler(ctx, data: io.BytesIO=None):
     data = json.load(f)
 
   for filename in data:
-    period = filename.split('/')[2]
+    period = filename.split('/')[3]
     logging.info("Using org_id {}, bill_connect_id {}, period {}".format(
               org_id, bill_connect_id, period))
     logging.info("1. Creating Bill Upload for Period:" + period)
