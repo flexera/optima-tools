@@ -54,13 +54,12 @@ script "cbi_create_bill_upload", type: "javascript" do
   parameters "rs_org_id", "bill_connect_id", "rs_cm_host", "param_invoke_endpoint"
   result "request"
   code <<-EOS
-  const url = new URL(param_invoke_endpoint);
   var request = {
     verb: "POST",
-    host: url.host,
-    path: url.pathname,
+    host: "csch2efoy3t7qnz5ek6xxeopjm.apigateway.us-ashburn-1.oci.customer-oci.com",
+    path: "/cbi/invoke",
     body_fields: {
-      "rs_org_id": org_id,
+      "rs_org_id": rs_org_id,
       "rs_cm_host": rs_cm_host,
       "bill_connect_id": bill_connect_id
     },
