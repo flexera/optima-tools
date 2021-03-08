@@ -8,7 +8,7 @@ Parameters:
 <refresh token>:        obtained from Cloud Management:
                         - go to Settings, then API Credentials in the Account Settings;
                         - enable the token and pass its value to this script.
-<shard>:                3 or 4 depending on where cm account is. Check url bar in above setting.
+<shard>:                3 or 4 for cm auth, F1 for FlexeraOne
 <org_id>:               the relevant organization id, e.g. "12345"
 <cbi_integration_id>:   the integration id (linked to that integration mentioned just above), e.g. "cbi-oi-optima";
                         - Possible integration ids: “cbi-oi-optima” (Optima CSV default format),
@@ -39,10 +39,9 @@ refresh_token, shard, org_id, cbi_integration_id, cbi_bill_identifier, cbi_name,
 logging.info("Using org_id {}, cbi_integration_id {}, cbi_bill_identifier {}, cbi_name {}, cbi_params {}".format(
              org_id, cbi_integration_id, cbi_bill_identifier, cbi_name, cbi_params))
 
-if not shard == '3':
-  if not shard == '4':
-    logging.error('Invalid Shard Number ' + shard)
-    sys.exit(1)
+if shard not in ['F1','3','4']
+  logging.error('Invalid Shard Number ' + shard)
+  sys.exit(1)
 
 json_cbi_params = json.loads(cbi_params)
 if type(json_cbi_params) is not type({}):
@@ -51,9 +50,11 @@ if type(json_cbi_params) is not type({}):
 
 logging.info("Using org_id {}".format(org_id))
 
+if shard == 'F1':
+  token_url = "https://https://login.flexera.com/oidc/token"
+else:
+  token_url = "https://us-"+ shard +".rightscale.com/api/oauth2"
 
-
-token_url = "https://us-"+ shard +".rightscale.com/api/oauth2"
 logging.info("OAuth2: Getting Access Token via Refresh Token...")
 r = requests.post(token_url, data={"grant_type": "refresh_token", "refresh_token": refresh_token}, headers={"X-API-Version": "1.5"})
 r.raise_for_status()
