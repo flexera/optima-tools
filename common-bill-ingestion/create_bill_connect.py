@@ -2,7 +2,7 @@
 Bill Connect Tool
 ---------------------------
 Creates a bill connect and returns the response
-Usage: ./bill_upload_example2.py <refresh_token> <shard> <org_id> <cbi_integration_id> <cbi_bill_identifier> <cbi_name> <cbi_params>
+Usage: python create_bill_connect.py <refresh_token> <shard> <org_id> <cbi_integration_id> <cbi_bill_identifier> <cbi_name> <cbi_params>
 
 Parameters:
 <refresh token>:        obtained from Cloud Management:
