@@ -39,7 +39,7 @@ refresh_token, shard, org_id, cbi_integration_id, cbi_bill_identifier, cbi_name,
 logging.info("Using org_id {}, cbi_integration_id {}, cbi_bill_identifier {}, cbi_name {}, cbi_params {}".format(
              org_id, cbi_integration_id, cbi_bill_identifier, cbi_name, cbi_params))
 
-if shard not in ['F1','3','4']
+if shard not in ['F1','3','4']:
   logging.error('Invalid Shard Number ' + shard)
   sys.exit(1)
 
@@ -72,5 +72,8 @@ bill_connect = {
   "cbi_params": json_cbi_params
 }
 r = requests.post(bill_connect_url, json.dumps(bill_connect), **kwargs)
+if r.status_code == 403:
+  print("\033[91m\nUser needs Enterprise Manager role!!!\n\033[0m")
+
 logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), indent=4)))
 r.raise_for_status()
