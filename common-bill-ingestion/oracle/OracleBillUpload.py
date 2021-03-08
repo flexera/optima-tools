@@ -8,11 +8,12 @@ import time
 # Tweak the destination (e.g. sys.stdout instead) and level (e.g. logging.DEBUG instead) to taste!
 logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', stream=sys.stderr, level=logging.INFO)
 
-refresh_token = os.environ.get('REFRESH_TOKEN')
-org_id = os.environ.get('ORG_ID')
-bill_connect_id = os.environ.get("BILL_CONNECT_ID")
-shard = os.environ.get("SHARD")
-
+refresh_token = '68977fd77301d3df33d26882ea243d8ce23d47ae'
+org_id = '27159'
+bill_connect_id = 'cbi-oi-oracle-oracle-1'
+period = '2021-01'
+shard = '3'
+token_url = "https://us-"+ shard +".rightscale.com/api/oauth2"
 if not shard == '3':
   if not shard == '4':
     logging.error('Invalid Shard Number ' + shard)
@@ -41,6 +42,7 @@ with open(json_file) as f:
   data = json.load(f)
 
 for filename in data:
+  time.sleep(121)
   period = filename.split('\\')[1]
   logging.info("1. Creating Bill Upload for Period:" + period)
   bill_upload = {"billConnectId": bill_connect_id, "billingPeriod": period}
