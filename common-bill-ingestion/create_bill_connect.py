@@ -2,7 +2,7 @@
 Bill Connect Tool
 ---------------------------
 Creates a bill connect and returns the response
-Usage: python create_bill_connect.py <refresh_token> <shard> <org_id> <cbi_integration_id> <cbi_bill_identifier> <cbi_name> <cbi_params>
+Usage: python create_bill_connect.py <refresh_token> <shard> <org_id> <cbi_integration_id> <cbi_bill_identifier> <cbi_name> <cbi_params> true
 
 Parameters:
 <refresh token>:        obtained from Cloud Management:
@@ -19,6 +19,7 @@ Parameters:
 <cbi_name>:             a name/description, a human-readable string to give more information, e.g. "My test Optima CSV integration, number One";
 <cbi_params>:           a parameter object in json to override the default integration settings. Pass an empty one if you are not passing any such parameters,
                         e.g. '{}'.
+<tls_verification>:     true/false
 '''
 import os
 import json
@@ -26,19 +27,22 @@ import logging
 import requests
 import sys
 import time
+import urllib3
+from urllib3.exceptions import InsecureRequestWarning
 
 # Tweak the destination (e.g. sys.stdout instead) and level (e.g. logging.DEBUG instead) to taste!
 logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', stream=sys.stderr, level=logging.INFO)
 
-if len(sys.argv) < 8:
+if len(sys.argv) < 9:
     logging.error('Missing command-line options!!!')
     print(__doc__)
     sys.exit(1)
 
-refresh_token, shard, org_id, cbi_integration_id, cbi_bill_identifier, cbi_name, cbi_params = sys.argv[1:]
-logging.info("Using org_id {}, cbi_integration_id {}, cbi_bill_identifier {}, cbi_name {}, cbi_params {}".format(
-             org_id, cbi_integration_id, cbi_bill_identifier, cbi_name, cbi_params))
+refresh_token, shard, org_id, cbi_integration_id, cbi_bill_identifier, cbi_name, cbi_params, tls_verification = sys.argv[1:]
+logging.info("Using org_id {}, cbi_integration_id {}, cbi_bill_identifier {}, cbi_name {}, cbi_params {}, tls_verification {}".format(
+             org_id, cbi_integration_id, cbi_bill_identifier, cbi_name, cbi_params, tls_verification))
 
+#System checks
 if shard not in ['F1','3','4']:
   logging.error('Invalid Shard Number ' + shard)
   sys.exit(1)
@@ -48,6 +52,16 @@ if type(json_cbi_params) is not type({}):
   logging.error("cbi_params is not of type dict")
   sys.exit(1)
 
+if tls_verification.lower not in ['true','false']:
+  logging.error("tls_verification must be 0 or 1")
+  sys.exit(1)
+
+if tls_verification.lower == 'true':
+  tls_verify = True
+else:
+  urllib3.disable_warnings(InsecureRequestWarning)
+  tls_verify = False
+
 logging.info("Using org_id {}".format(org_id))
 
 if shard == 'F1':
@@ -56,7 +70,7 @@ else:
   token_url = "https://us-"+ shard +".rightscale.com/api/oauth2"
 
 logging.info("OAuth2: Getting Access Token via Refresh Token...")
-r = requests.post(token_url, data={"grant_type": "refresh_token", "refresh_token": refresh_token}, headers={"X-API-Version": "1.5"})
+r = requests.post(token_url, data={"grant_type": "refresh_token", "refresh_token": refresh_token}, headers={"X-API-Version": "1.5"}, verify=tls_verify)
 r.raise_for_status()
 access_token = r.json()["access_token"]
 
@@ -71,7 +85,7 @@ bill_connect = {
   "cbi_name": cbi_name,
   "cbi_params": json_cbi_params
 }
-r = requests.post(bill_connect_url, json.dumps(bill_connect), **kwargs)
+r = requests.post(bill_connect_url, json.dumps(bill_connect), verify=tls_verify, **kwargs)
 if r.status_code == 403:
   print("\033[91m\nUser needs Enterprise Manager role!!!\n\033[0m")
 
