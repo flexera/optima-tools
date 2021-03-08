@@ -11,16 +11,12 @@ logging.basicConfig(format='%(levelname)s:%(asctime)s:%(message)s', stream=sys.s
 refresh_token = '68977fd77301d3df33d26882ea243d8ce23d47ae'
 org_id = '27159'
 bill_connect_id = 'cbi-oi-oracle-oracle-1'
-period = '2021-01'
 shard = '3'
-token_url = "https://us-"+ shard +".rightscale.com/api/oauth2"
+
 if not shard == '3':
   if not shard == '4':
     logging.error('Invalid Shard Number ' + shard)
     sys.exit(1)
-
-logging.info("Using org_id {}, bill_connect_id {}, period {}".format(
-             org_id, bill_connect_id, period))
 
 token_url = "https://us-"+ shard +".rightscale.com/api/oauth2"
 bill_upload_url = "https://optima-bill-upload-front.indigo.rightscale.com/optima/orgs/{}/billUploads".format(org_id)
@@ -44,6 +40,8 @@ with open(json_file) as f:
 for filename in data:
   time.sleep(121)
   period = filename.split('\\')[1]
+  logging.info("Using org_id {}, bill_connect_id {}, period {}".format(
+             org_id, bill_connect_id, period))
   logging.info("1. Creating Bill Upload for Period:" + period)
   bill_upload = {"billConnectId": bill_connect_id, "billingPeriod": period}
   r = requests.post(bill_upload_url, json.dumps(bill_upload), **kwargs)
