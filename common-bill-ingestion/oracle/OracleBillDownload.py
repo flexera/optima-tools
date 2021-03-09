@@ -22,8 +22,8 @@ import gzip
 reporting_namespace = 'bling'
 
 # Download all usage and cost files. You can comment out based on the specific need:
-# prefix_file = ""                     #  For cost and usage files
-prefix_file = "reports/cost-csv"   #  For cost
+prefix_file = "reports/cost-csv"                     #  For cost and usage files
+# prefix_file = "reports/cost-csv"   #  For cost
 # prefix_file = "reports/usage-csv"  #  For usage
 
 # Update these values
@@ -39,13 +39,15 @@ if not os.path.exists(destination_path):
 # Get the list of reports
 config = oci.config.from_file(oci.config.DEFAULT_LOCATION, oci.config.DEFAULT_PROFILE)
 reporting_bucket = config['tenancy']
+print(reporting_bucket)
 object_storage = oci.object_storage.ObjectStorageClient(config)
 report_bucket_objects = object_storage.list_objects(reporting_namespace, reporting_bucket, prefix=prefix_file, fields='name,etag,timeCreated,md5,timeModified,storageTier,archivalState')
 
 # Do date stuff
 utc=pytz.UTC
 now = datetime.now()
-last_three_months = utc.localize(now) + relativedelta(months=-3)
+last_three_months = utc.localize(now) + relativedelta(months=-3,day=1,hour=0,minute=0,second=0,microsecond=0)
+print(last_three_months)
 
 # set downloaded_files array for upload
 downloaded_files = []
@@ -80,24 +82,27 @@ for o in report_bucket_objects.data.objects:
 
       print('----> File ' + o.name + ' Downloaded')
 
+  # uploading files to endpoint
+  dir_path =  os.path.dirname(os.path.realpath(__file__))
+  json_file = os.path.join(dir_path, 'files.json')
+  with open(json_file,'w') as outfile:
+    json.dump(downloaded_files, outfile, indent=2)
+
 # https://stackoverflow.com/questions/18208898/concatenate-gzipped-files-with-python-on-windows
-my_dict = defaultdict(list)
+# my_dict = defaultdict(list)
 
-for f in downloaded_files:
-  my_dict[f[:12]].append(f)
+# for f in downloaded_files:
+#   my_dict[f[:12]].append(f)
 
-concatenatedFiles = []
-for key in my_dict.keys():
-  destFilename = os.path.join(key, "concatenated.csv.gz")
-  concatenatedFiles.append(destFilename)
+# concatenatedFiles = []
+# for key in my_dict.keys():
+#   destFilename = os.path.join(key, "concatenated.csv.gz")
+#   concatenatedFiles.append(destFilename)
 
-  with gzip.open(destFilename, 'wb') as destFile:
-    counter = 0
-    for fileName in my_dict[key]:
-      with gzip.open(fileName, 'rb') as sourceFile:
-        for chunk in sourceFile.readlines()[counter:]:
-          destFile.write(chunk)
-      counter =  1
-
-with open('files.json','w') as outfile:
-    json.dump(concatenatedFiles, outfile, indent=2)
+#   with gzip.open(destFilename, 'wb') as destFile:
+#     counter = 0
+#     for fileName in my_dict[key]:
+#       with gzip.open(fileName, 'rb') as sourceFile:
+#         for chunk in sourceFile.readlines()[counter:]:
+#           destFile.write(chunk)
+#       counter =  1
