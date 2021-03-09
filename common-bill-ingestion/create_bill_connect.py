@@ -65,7 +65,7 @@ else:
 logging.info("Using org_id {}".format(org_id))
 
 if shard == 'F1':
-  token_url = "https://https://login.flexera.com/oidc/token"
+  token_url = "https://login.flexera.com/oidc/token"
 else:
   token_url = "https://us-"+ shard +".rightscale.com/api/oauth2"
 
