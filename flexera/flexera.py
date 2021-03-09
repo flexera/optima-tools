@@ -12,6 +12,10 @@ from urllib3.exceptions import InsecureRequestWarning
 @click.option('--shard', type=click.Choice(['3', '4', 'F1'], case_sensitive=False), prompt='Shard for authentication', help='Shard for authentication')
 @click.option('--disable-tls-verify', is_flag=True)
 
+def cli(shard, refresh_token, disable_tls_verify):
+  access_token = auth(shard, refresh_token, disable_tls_verify)
+  return access_token
+
 def auth(shard, refresh_token, disable_tls_verify):
   if shard not in ['F1','3','4']:
     logging.error('Invalid Shard Number ' + shard)
@@ -38,4 +42,4 @@ def auth(shard, refresh_token, disable_tls_verify):
 if __name__ == '__main__':
   # click passes no args
   # pylint: disable=no-value-for-parameter
-  auth()
+  cli()
