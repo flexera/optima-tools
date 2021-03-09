@@ -82,7 +82,10 @@ for o in report_bucket_objects.data.objects:
 
       print('----> File ' + o.name + ' Downloaded')
 
-  with open('files.json','w') as outfile:
+  # uploading files to endpoint
+  dir_path =  os.path.dirname(os.path.realpath(__file__))
+  json_file = os.path.join(dir_path, 'files.json')
+  with open(json_file,'w') as outfile:
     json.dump(downloaded_files, outfile, indent=2)
 
 # https://stackoverflow.com/questions/18208898/concatenate-gzipped-files-with-python-on-windows
