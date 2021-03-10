@@ -1,0 +1,92 @@
+name "Oracle CBI Upload"
+rs_pt_ver 20180301
+type "policy"
+short_description "Azure China CBI Policy. See the [README](https://github.com/flexera/optima-tools/tree/master/common-bill-ingestion/azure_china/) and [docs.rightscale.com/policies](https://docs.rightscale.com/policies/) to learn more."
+long_description ""
+severity "low"
+category "Cost"
+default_frequency "daily"
+info(
+  version: "1.0",
+)
+
+###############################################################################
+# Parameters
+###############################################################################
+
+# Need to read the Azure EA key from credentials
+permission "perm_read_creds" do
+  actions   "rs_cm.show_sensitive","rs_cm.index_sensitive"
+  resources "rs_cm.credentials"
+end
+
+# Could maybe get this from the EA key, but for now just ask for it
+parameter "param_bill_connect_id" do
+  type "string"
+  label "Bill Connect ID"
+  description "Bill Connect ID created in CBI API ex: cbi-oi-azure-china-*"
+  allowed_pattern /cbi-oi-oracle-[a-zA-Z0-9]*/
+end
+
+parameter "param_invoke_endpoint" do
+  type "string"
+  label "Invoke Endpoint"
+  description "invoke endpoint of the function app"
+end
+
+parameter "param_email" do
+  type "list"
+  label "Email addresses"
+end
+
+auth "auth_rs", type: "rightscale"
+
+# Build the API request object dynamically because we need to
+#  calculate the startdate and enddate based on today
+
+datasource "create_bill_upload" do
+  request do
+    run_script $cbi_create_bill_upload, rs_org_id, $param_bill_connect_id, rs_cm_host, $param_invoke_endpoint
+  end
+end
+
+script "cbi_create_bill_upload", type: "javascript" do
+  parameters "rs_org_id", "bill_connect_id", "rs_cm_host", "param_invoke_endpoint"
+  result "request"
+  code <<-EOS
+  var request = {
+    verb: "POST",
+    host: "csch2efoy3t7qnz5ek6xxeopjm.apigateway.us-ashburn-1.oci.customer-oci.com",
+    path: "/cbi/invoke",
+    body_fields: {
+      "rs_org_id": rs_org_id,
+      "rs_cm_host": rs_cm_host,
+      "bill_connect_id": bill_connect_id
+    },
+    headers: {
+      "User-Agent": "RS Policies",
+      "allow_redirects": "False",
+    }
+  }
+  EOS
+end
+
+policy "pol_cbi" do
+  validate $create_bill_upload do
+    summary_template "Oracle CBI Bill Upload"
+    detail_template <<-EOS
+Bill Uploaded {{data.files_processed}}
+EOS
+    escalate $email
+    resolve $res_close_incident
+    check eq(0,1)
+  end
+end
+
+escalation "email" do
+  email $param_email
+end
+
+resolution "res_close_incident" do
+  email $param_email
+end
