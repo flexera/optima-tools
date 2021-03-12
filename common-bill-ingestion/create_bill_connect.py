@@ -52,8 +52,9 @@ if type(json_cbi_params) is not type({}):
   logging.error("cbi_params is not of type dict")
   sys.exit(1)
 
-if tls_verification.lower not in ['true','false']:
-  logging.error("tls_verification must be 0 or 1")
+print(tls_verification.lower())
+if tls_verification.lower() not in ['true','false']:
+  logging.error("tls_verification must be true or false")
   sys.exit(1)
 
 if tls_verification.lower == 'true':
