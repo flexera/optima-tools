@@ -155,10 +155,10 @@ def handler(ctx, data: io.BytesIO=None):
   my_dict = defaultdict(list)
 
   for f in data:
-    my_dict[f[:12]].append(f)
+    my_dict[f[:17]].append(f)
 
   for key in my_dict.keys():
-    period = key.split('\\')[1]
+    period = key.split('/')[3]
     logging.info("Using org_id {}, bill_connect_id {}, period {}".format(
               org_id, bill_connect_id, period))
     logging.info("1. Creating Bill Upload for Period:" + period)
@@ -174,6 +174,7 @@ def handler(ctx, data: io.BytesIO=None):
       upload_file_url = "{}/{}/files/{}".format(bill_upload_url, bill_upload_id, base_name)
       r = requests.post(upload_file_url, data=open(fileName, 'rb').read(), **kwargs)
       logging.info("Response: {}\n{}".format(r.status_code, json.dumps(r.json(), indent=4)))
+      r.raise_for_status()
 
     logging.info("3. Committing the Bill Upload {}...".format(bill_upload_id))
     operations_url = "{}/{}/operations".format(bill_upload_url, bill_upload_id)
