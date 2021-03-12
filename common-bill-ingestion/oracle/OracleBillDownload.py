@@ -82,24 +82,27 @@ for o in report_bucket_objects.data.objects:
 
       print('----> File ' + o.name + ' Downloaded')
 
+  # uploading files to endpoint
+  dir_path =  os.path.dirname(os.path.realpath(__file__))
+  json_file = os.path.join(dir_path, 'files.json')
+  with open(json_file,'w') as outfile:
+    json.dump(downloaded_files, outfile, indent=2)
+
 # https://stackoverflow.com/questions/18208898/concatenate-gzipped-files-with-python-on-windows
-my_dict = defaultdict(list)
+# my_dict = defaultdict(list)
 
-for f in downloaded_files:
-  my_dict[f[:12]].append(f)
+# for f in downloaded_files:
+#   my_dict[f[:12]].append(f)
 
-concatenatedFiles = []
-for key in my_dict.keys():
-  destFilename = os.path.join(key, "concatenated.csv.gz")
-  concatenatedFiles.append(destFilename)
+# concatenatedFiles = []
+# for key in my_dict.keys():
+#   destFilename = os.path.join(key, "concatenated.csv.gz")
+#   concatenatedFiles.append(destFilename)
 
-  with gzip.open(destFilename, 'wb') as destFile:
-    counter = 0
-    for fileName in my_dict[key]:
-      with gzip.open(fileName, 'rb') as sourceFile:
-        for chunk in sourceFile.readlines()[counter:]:
-          destFile.write(chunk)
-      counter =  1
-
-with open('files.json','w') as outfile:
-    json.dump(concatenatedFiles, outfile, indent=2)
+#   with gzip.open(destFilename, 'wb') as destFile:
+#     counter = 0
+#     for fileName in my_dict[key]:
+#       with gzip.open(fileName, 'rb') as sourceFile:
+#         for chunk in sourceFile.readlines()[counter:]:
+#           destFile.write(chunk)
+#       counter =  1
